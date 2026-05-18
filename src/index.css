@@ -1,0 +1,235 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --cream: #FAF8FF;
+  --blush: #C6B2E0;
+  --blush-light: #FAF8FF;
+  --blush-mid: #B19CD9;
+  --blush-deep: #8A6EB8;
+  --rose: #6B4D91;
+  --champagne: #FAF2E6;
+  --lavender: #E1D5F0;
+  --lavender-light: #F6F2FC;
+  --sage: #A5B5A3;
+  --sage-light: #F2F6F1;
+  --text: #2E2235;
+  --text-muted: #897C96;
+  --text-soft: #A699B5;
+  --white: #FFFFFF;
+  --gold: #C9A96E;
+  --warm-beige: #F6EFE6;
+  --soft-slate: #7B809A;
+  --off-white: #FCFAFF;
+
+  --shadow-sm: 0 2px 10px rgba(46, 34, 53, 0.05);
+  --shadow-md: 0 6px 28px rgba(46, 34, 53, 0.08);
+  --shadow-lg: 0 16px 52px rgba(46, 34, 53, 0.12);
+  --shadow-xl: 0 28px 96px rgba(46, 34, 53, 0.16);
+  --shadow-rose: 0 8px 32px rgba(177, 156, 217, 0.28);
+  --shadow-rose-lg: 0 16px 48px rgba(177, 156, 217, 0.38);
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 100px;
+
+  --transition-fast: 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #FAF8FF 0%, #FAF6F0 45%, #EDE5F7 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'DM Sans', 'Inter', sans-serif;
+}
+
+/* ─── Premium Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #B19CD9, #E1D5F0);
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover { background: #8A6EB8; }
+
+/* ─── Keyframe Animations ───────────────────────────────── */
+@keyframes toastReveal {
+  0% { transform: translateY(20px) scale(0.9); opacity: 0; }
+  60% { transform: translateY(-3px) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.94) translateY(16px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@keyframes floatPetal {
+  0% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-14px) rotate(6deg); }
+  66% { transform: translateY(-6px) rotate(-4deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(177, 156, 217, 0.25); }
+  50% { box-shadow: 0 0 32px rgba(177, 156, 217, 0.5); }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeUp {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes carouselFade {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes progressFill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+@keyframes checkmark {
+  0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(0deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes petalFloat {
+  0% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.15; }
+  50% { transform: translateY(-20px) rotate(8deg) scale(1.05); opacity: 0.25; }
+  100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0.15; }
+}
+
+@keyframes badgeBounce {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes navUnderline {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes drawerSlide {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Utility Classes ───────────────────────────────────── */
+.marquee-track {
+  display: flex;
+  animation: marqueeScroll 28s linear infinite;
+  will-change: transform;
+}
+.marquee-track:hover { animation-play-state: paused; }
+
+.floating-petal {
+  animation: petalFloat var(--duration, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0e8ec 25%, #f8f0f3 50%, #f0e8ec 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-dark {
+  background: rgba(45, 31, 40, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* ─── Focus Styles ──────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--blush-mid);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Selection ─────────────────────────────────────────── */
+::selection {
+  background: rgba(177, 156, 217, 0.25);
+  color: var(--text);
+}
+
+/* ─── Mobile overscroll ─────────────────────────────────── */
+@media (max-width: 768px) {
+  body { overscroll-behavior-y: contain; }
+}
+
+/* ─── Lenis Smooth Scroll Configuration ──────────────────── */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}

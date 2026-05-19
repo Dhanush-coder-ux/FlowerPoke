@@ -5,12 +5,33 @@ import HeroCanvas from "../3d/HeroCanvas";
 import { palette } from "../../utils/constants";
 
 const carouselImages = [
-  "https://images.unsplash.com/photo-1548094891-c4ba474efd16?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1508610048659-a06b669e3321?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1490750967868-88cb44cb2753?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+  {
+    url: "https://images.unsplash.com/photo-1548094891-c4ba474efd16?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    title: "Eternal Pastels",
+    desc: "Soft pinks, creams, and whites for delicate and elegant occasions."
+  },
+  {
+    url: "https://images.unsplash.com/photo-1582794543139-8ac9cb0f7b11?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    title: "Royal Crimson",
+    desc: "Rich red roses and deep dark foliage for passionate and classic statements."
+  },
+  {
+    url: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    title: "Orchid Whispers",
+    desc: "Exotic orchids, elegant lilies, and custom luxury styling for refined tastes."
+  },
+  {
+    url: "https://images.unsplash.com/photo-1508610048659-a06b669e3321?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    title: "Sunshine Meadows",
+    desc: "Vibrant yellow sunflowers, wildflowers, and daisies to brighten any modern space."
+  },
+  {
+    url: "https://images.unsplash.com/photo-1490750967868-88cb44cb2753?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    title: "Lavender Dreams",
+    desc: "Calming lavender blooms, fresh foliage, and wild herbs for ultimate peace."
+  }
 ];
+
 
 export default function Hero() {
   const containerRef = useRef(null);
@@ -41,7 +62,7 @@ export default function Hero() {
 
   return (
     <div ref={containerRef} style={{ background: palette.cream }}>
-      
+
       {/* 1. Fullscreen 3D Hero Section */}
       <section
         style={{
@@ -106,7 +127,7 @@ export default function Hero() {
         <motion.div style={{ opacity, scale, width: "100%", height: "100%", position: "relative", zIndex: 10 }}>
           <HeroCanvas />
         </motion.div>
-        
+
         {/* Scroll Indicator */}
         <motion.div
           animate={{ y: [0, 10, 0] }}
@@ -136,7 +157,7 @@ export default function Hero() {
         style={{
           minHeight: "100vh",
           width: "100%",
-          background: "#fff",
+          background: "transparent",
           position: "relative",
           zIndex: 10,
           padding: "120px clamp(20px, 5vw, 60px)",
@@ -144,7 +165,6 @@ export default function Hero() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          boxShadow: "0 -20px 60px rgba(0,0,0,0.03)"
         }}
       >
         <motion.div
@@ -157,11 +177,11 @@ export default function Hero() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 60 }}>
             <h2
               style={{
-                fontFamily: "'Cormorant Garamond', serif",
+                fontFamily: "'Outfit', sans-serif",
                 fontSize: "clamp(36px, 5vw, 56px)",
                 color: palette.text,
                 margin: 0,
-                fontWeight: 500,
+                fontWeight: 700,
                 letterSpacing: "-0.5px"
               }}
             >
@@ -245,25 +265,26 @@ export default function Hero() {
               <motion.div
                 key={i}
                 style={{
-                  minWidth: "clamp(300px, 40vw, 480px)",
-                  height: "clamp(420px, 55vw, 640px)",
+                  minWidth: "clamp(320px, 50vw, 600px)",
+                  height: "clamp(200px, 31.25vw, 375px)",
                   flexShrink: 0,
                   scrollSnapAlign: "center",
-                  borderRadius: 0, // SHARP EDGES
+                  borderRadius: 24, // GORGEOUS ROUNDED CORNERS
                   overflow: "hidden",
                   position: "relative",
-                  boxShadow: activeImg === i ? "0 20px 50px rgba(45,31,40,0.15)" : "0 4px 20px rgba(45,31,40,0.05)",
+                  boxShadow: activeImg === i ? "0 20px 50px rgba(45,31,40,0.2)" : "0 4px 20px rgba(45,31,40,0.05)",
                   transition: "box-shadow 0.5s ease, transform 0.5s ease",
-                  transform: activeImg === i ? "scale(1)" : "scale(0.95)",
+                  transform: activeImg === i ? "scale(1)" : "scale(0.96)",
                   cursor: "pointer",
+                  border: "1px solid rgba(242,196,206,0.2)",
                 }}
                 onClick={() => setActiveImg(i)}
                 onViewportEnter={() => setActiveImg(i)}
                 viewport={{ amount: 0.8 }}
               >
-                <img 
-                  src={img} 
-                  alt={`Collection ${i + 1}`}
+                <img
+                  src={img.url}
+                  alt={img.title}
                   style={{
                     width: "100%",
                     height: "100%",
@@ -273,12 +294,61 @@ export default function Hero() {
                   onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.08)"}
                   onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
                 />
+
+                {/* Premium Text Overlay */}
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: "linear-gradient(to top, rgba(45,31,40,0.85) 0%, rgba(45,31,40,0.3) 60%, transparent 100%)",
+                    padding: "28px 24px 20px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "flex-end",
+                    height: "60%",
+                    transition: "opacity 0.4s ease",
+                    opacity: activeImg === i ? 1 : 0.4,
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontFamily: "'Poppins', sans-serif",
+                      fontSize: "clamp(18px, 2.2vw, 26px)",
+                      color: "#fff",
+                      margin: "0 0 6px",
+                      fontWeight: 600,
+                      letterSpacing: "0.2px",
+                      textShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                    }}
+                  >
+                    {img.title}
+                  </h3>
+                  <p
+                    style={{
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: "clamp(12px, 1.3vw, 14px)",
+                      color: "rgba(255,255,255,0.85)",
+                      margin: 0,
+                      lineHeight: 1.45,
+                      fontWeight: 400,
+                      maxWidth: "92%",
+                      opacity: activeImg === i ? 1 : 0,
+                      transform: activeImg === i ? "translateY(0)" : "translateY(10px)",
+                      transition: "opacity 0.4s ease, transform 0.4s ease",
+                    }}
+                  >
+                    {img.desc}
+                  </p>
+                </div>
               </motion.div>
             ))}
           </div>
-          
+
           {/* Custom style to hide webkit scrollbar for the carousel */}
-          <style dangerouslySetInnerHTML={{__html: `
+          <style dangerouslySetInnerHTML={{
+            __html: `
             .hide-scrollbar::-webkit-scrollbar {
               display: none;
             }

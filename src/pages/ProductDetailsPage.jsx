@@ -30,6 +30,22 @@ export default function ProductDetailsPage() {
 
   // Carousel State
   const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // -1 for left, 1 for right
+
+  const handleNext = () => {
+    setDirection(1);
+    setActiveImgIndex((prev) => (prev === carouselImages.length - 1 ? 0 : prev + 1));
+  };
+
+  const handlePrev = () => {
+    setDirection(-1);
+    setActiveImgIndex((prev) => (prev === 0 ? carouselImages.length - 1 : prev - 1));
+  };
+
+  const handleThumbnailClick = (idx) => {
+    setDirection(idx > activeImgIndex ? 1 : -1);
+    setActiveImgIndex(idx);
+  };
 
   // Delivery Configuration States
   const [delType, setDelType] = useState("Same-day");
@@ -235,20 +251,47 @@ export default function ProductDetailsPage() {
                   border: "1px solid rgba(45,31,40,0.06)",
                 }}
               >
-                <motion.img
-                  key={activeImgIndex}
-                  src={carouselImages[activeImgIndex]}
-                  alt={`${product.name} view`}
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -50 }}
-                  transition={{ duration: 0.3 }}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
+                <AnimatePresence initial={false} custom={direction}>
+                  <motion.img
+                    key={activeImgIndex}
+                    src={carouselImages[activeImgIndex]}
+                    alt={`${product.name} view`}
+                    custom={direction}
+                    variants={{
+                      enter: (dir) => ({
+                        x: dir > 0 ? 280 : dir < 0 ? -280 : 0,
+                        opacity: 0
+                      }),
+                      center: {
+                        x: 0,
+                        opacity: 1
+                      },
+                      exit: (dir) => ({
+                        x: dir < 0 ? 280 : dir > 0 ? -280 : 0,
+                        opacity: 0
+                      })
+                    }}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{
+                      x: { type: "spring", stiffness: 300, damping: 30 },
+                      opacity: { duration: 0.2 }
+                    }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      position: "absolute",
+                      top: 0,
+                      left: 0
+                    }}
+                  />
+                </AnimatePresence>
                 
                 {/* Carousel Navigation Arrows */}
                 <button
-                  onClick={() => setActiveImgIndex((prev) => (prev === 0 ? carouselImages.length - 1 : prev - 1))}
+                  onClick={handlePrev}
                   style={{
                     position: "absolute",
                     left: 12,
@@ -271,7 +314,7 @@ export default function ProductDetailsPage() {
                   <ArrowLeft size={16} />
                 </button>
                 <button
-                  onClick={() => setActiveImgIndex((prev) => (prev === carouselImages.length - 1 ? 0 : prev + 1))}
+                  onClick={handleNext}
                   style={{
                     position: "absolute",
                     right: 12,
@@ -320,7 +363,7 @@ export default function ProductDetailsPage() {
                 {carouselImages.map((img, idx) => (
                   <motion.div
                     key={idx}
-                    onClick={() => setActiveImgIndex(idx)}
+                    onClick={() => handleThumbnailClick(idx)}
                     whileHover={{ scale: 1.05 }}
                     style={{
                       width: 60,

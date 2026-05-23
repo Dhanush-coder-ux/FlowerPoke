@@ -28,8 +28,66 @@ export default function CategoriesGrid() {
   };
 
   return (
-    <section style={{ padding: "80px clamp(16px, 4vw, 40px)", background: palette.offWhite || "#FEFCFA" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+    <section style={{ padding: "120px clamp(16px, 4vw, 40px) 80px", background: palette.offWhite || "#FEFCFA", position: "relative", overflow: "visible" }}>
+      {/* ── Seamless Curved Top Divider ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: -100, // Pulls the curve up into the hero section
+          left: 0,
+          width: "100%",
+          height: 100,
+          overflow: "hidden",
+          lineHeight: 0,
+          zIndex: 2, // Sits above the hero background
+        }}
+      >
+        <svg
+          viewBox="0 0 1440 100"
+          preserveAspectRatio="none"
+          style={{ width: "100%", height: "100%", display: "block" }}
+        >
+          <path
+            d="M0,0 C480,100 960,100 1440,0 L1440,100 L0,100 Z"
+            fill={palette.offWhite || "#FEFCFA"}
+          />
+        </svg>
+      </div>
+
+      {/* ── Watermark flower images (decorative, non-interactive) ── */}
+      {[
+        { src: "/SVG/WhatsApp_Image_2026-05-19_at_6.21.02_PM-removebg-preview.png",         top: "-60px",  left: "-80px",  size: 320, rotate: -15, opacity: 0.22 },
+        { src: "/SVG/WhatsApp_Image_2026-05-19_at_6.21.02_PM__1_-removebg-preview.png",     top: "-40px",  right: "-60px", size: 280, rotate: 12,  opacity: 0.18 },
+        { src: "/SVG/WhatsApp_Image_2026-05-19_at_6.21.02_PM__3_-removebg-preview.png",     bottom: "0px", left: "30px",   size: 260, rotate: -8,  opacity: 0.15 },
+        { src: "/SVG/WhatsApp_Image_2026-05-19_at_6.21.02_PM__5_-removebg-preview.png",     bottom: "-30px", right: "40px", size: 300, rotate: 18,  opacity: 0.20 },
+        { src: "/SVG/WhatsApp_Image_2026-05-19_at_6.21.02_PM__7_-removebg-preview.png",     top: "50%",   left: "50%",    size: 350, rotate: 5,   opacity: 0.12, transform: "translate(-50%, -50%)" },
+      ].map((wm, i) => (
+        <img
+          key={i}
+          src={wm.src}
+          alt=""
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top:    wm.top,
+            left:   wm.left,
+            right:  wm.right,
+            bottom: wm.bottom,
+            width:  wm.size,
+            height: wm.size,
+            objectFit: "contain",
+            opacity: wm.opacity,
+            transform: wm.transform || `rotate(${wm.rotate}deg)`,
+            pointerEvents: "none",
+            userSelect: "none",
+            mixBlendMode: "multiply",
+            zIndex: 0,
+            filter: "grayscale(20%)",
+          }}
+        />
+      ))}
+
+      <div style={{ maxWidth: 1200, margin: "0 auto", position: "relative", zIndex: 1 }}>
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

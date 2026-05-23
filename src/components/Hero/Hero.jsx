@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import HeroCanvas from "../3d/HeroCanvas";
 import { palette } from "../../utils/constants";
@@ -32,21 +32,40 @@ const carouselImages = [
   }
 ];
 
-
 export default function Hero() {
   const containerRef = useRef(null);
+  const heroSectionRef = useRef(null);
+  const carouselRef = useRef(null);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"]
   });
 
-  // Parallax fade for the 3D canvas when scrolling down
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+  // Scroll-driven parallax — canvas fades out slightly on scroll
+  const canvasOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const canvasScale  = useTransform(scrollYProgress, [0, 0.5], [1, 0.95]);
+
+  // Typography parallax — scrolls slightly faster than bouquet (depth illusion)
+  const typoY = useTransform(scrollYProgress, [0, 0.5], [0, -60]);
+
+  // Mouse parallax for the HTML UI content layer (subtle)
+  const mouseRef = useRef({ x: 0, y: 0 });
+  const uiX = useSpring(0, { stiffness: 60, damping: 20 });
+  const uiY = useSpring(0, { stiffness: 60, damping: 20 });
+
+  useEffect(() => {
+    const handleMouse = (e) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      uiX.set(((e.clientX - cx) / cx) * 6);
+      uiY.set(((e.clientY - cy) / cy) * 4);
+    };
+    window.addEventListener("mousemove", handleMouse);
+    return () => window.removeEventListener("mousemove", handleMouse);
+  }, [uiX, uiY]);
 
   const [activeImg, setActiveImg] = useState(0);
-
-  const carouselRef = useRef(null);
 
   const scrollLeft = () => {
     if (carouselRef.current) {
@@ -63,96 +82,322 @@ export default function Hero() {
   return (
     <div ref={containerRef} style={{ background: palette.cream }}>
 
-      {/* 1. Fullscreen 3D Hero Section */}
+      {/* ═══════════════════════════════════════════════════════
+          FULLSCREEN HERO SECTION — CINEMATIC LAYERED COMPOSITION
+          Layer stack (bottom → top):
+            1. Background gradient        (z: 0)
+            2. CSS floating petals layer  (z: 5)
+            3. 3D bouquet canvas          (z: 20)  ← interactive
+            4. Giant ETERNAL BLOOMS type  (z: 30)  ← blend on top
+            5. UI / CTA content           (z: 40)
+         ═══════════════════════════════════════════════════════ */}
       <section
+        ref={heroSectionRef}
         style={{
           height: "100vh",
           width: "100%",
           position: "sticky",
           top: 0,
           overflow: "hidden",
-          background: `linear-gradient(135deg, #FAF6F0 0%, #FAF8FF 45%, #E1D5F0 100%)`,
+          /* Layer 1 — background gradient */
+          background: `
+            radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(220,200,255,0.55) 0%, transparent 70%),
+            radial-gradient(ellipse 60% 50% at 20% 100%, rgba(255,215,230,0.4)  0%, transparent 65%),
+            radial-gradient(ellipse 50% 40% at 80% 80%,  rgba(180,150,240,0.35) 0%, transparent 65%),
+            linear-gradient(135deg, #FAF6F0 0%, #FAF8FF 45%, #E1D5F0 100%)
+          `,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        {/* Massive Background Typography */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+
+        {/* ── Layer 2: CSS Floating Petal Particles (HTML layer, z:5) ── */}
+        <div
+          aria-hidden="true"
           style={{
             position: "absolute",
-            zIndex: 1,
+            inset: 0,
+            zIndex: 5,
+            pointerEvents: "none",
+            overflow: "hidden",
+          }}
+        >
+          {Array.from({ length: 18 }).map((_, i) => (
+            <motion.div
+              key={i}
+              style={{
+                position: "absolute",
+                width: `${8 + (i % 5) * 6}px`,
+                height: `${8 + (i % 5) * 6}px`,
+                left: `${(i * 5.5 + 3) % 100}%`,
+                top: `${(i * 7 + 10) % 110}%`,
+                borderRadius: "60% 40% 70% 30% / 50% 60% 40% 70%",
+                background: [
+                  "rgba(200,170,240,0.25)",
+                  "rgba(242,196,206,0.3)",
+                  "rgba(177,140,220,0.2)",
+                  "rgba(255,182,193,0.25)",
+                  "rgba(200,200,255,0.2)",
+                ][i % 5],
+                filter: `blur(${i % 3}px)`,
+              }}
+              animate={{
+                y: [0, -30, 0, 20, 0],
+                x: [0, 15, -10, 8, 0],
+                rotate: [0, 120, 240, 360],
+                scale: [1, 1.15, 0.9, 1.05, 1],
+              }}
+              transition={{
+                duration: 8 + (i % 4) * 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: i * 0.4,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* ── Layer 3: 3D Bouquet Canvas (z:20) — INTERACTIVE ── */}
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 20,
+            opacity: canvasOpacity,
+            scale: canvasScale,
+            // Allow mouse events so the 3D scene gets them
+            pointerEvents: "auto",
+          }}
+        >
+          <HeroCanvas />
+        </motion.div>
+
+        {/* ── Layer 4: Giant "ETERNAL BLOOMS" Typography (z:30) ── */}
+        {/* CRITICAL: sits ABOVE the bouquet, blends through it cinematically */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.8, ease: [0.2, 0.8, 0.2, 1] }}
+          style={{
+            position: "absolute",
+            zIndex: 30,
             pointerEvents: "none",
             userSelect: "none",
             textAlign: "center",
             width: "100%",
+            y: typoY,
+            /* Depth blur: slightly soft so it reads as distance */
+            filter: "blur(0px)",
           }}
         >
           <h1
             style={{
               fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(80px, 18vw, 250px)",
+              fontSize: "clamp(80px, 18vw, 260px)",
               fontWeight: 700,
-              lineHeight: 0.85,
+              lineHeight: 0.83,
               margin: 0,
               letterSpacing: "-0.04em",
               textTransform: "uppercase",
             }}
           >
-            <span style={{ color: "rgba(165, 142, 186, 0.85)", display: "block" }}>
+            {/* "ETERNAL" — elegant, solid, subtle static depth */}
+            <span
+              style={{
+                display: "block",
+                color: "#7B3FA0",
+                opacity: 1,
+                mixBlendMode: "normal",
+                WebkitTextStroke: "0px",
+                textShadow: "0px 8px 24px rgba(123, 63, 160, 0.25)",
+              }}
+            >
               Eternal
             </span>
-            <span style={{ color: "rgba(165, 142, 186, 0.2)", display: "block" }}>
+
+            {/* "BLOOMS" — Singular, intense, attractive neon flow in one color */}
+            <motion.span
+              animate={{
+                textShadow: [
+                  "0 0 10px rgba(177, 156, 217, 0.4), 0 0 20px rgba(177, 156, 217, 0.3), 0 0 30px rgba(177, 156, 217, 0.2)",
+                  "0 0 15px rgba(177, 156, 217, 0.9), 0 0 30px rgba(177, 156, 217, 0.7), 0 0 50px rgba(177, 156, 217, 0.5), 0 0 70px rgba(177, 156, 217, 0.3)",
+                  "0 0 10px rgba(177, 156, 217, 0.4), 0 0 20px rgba(177, 156, 217, 0.3), 0 0 30px rgba(177, 156, 217, 0.2)",
+                ]
+              }}
+              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+              style={{
+                display: "block",
+                color: "#FFFFFF",
+                opacity: 1,
+                mixBlendMode: "normal",
+                position: "relative",
+                zIndex: 35,
+              }}
+            >
               Blooms
-            </span>
+            </motion.span>
           </h1>
+
+          {/* Sub-tagline — fully readable, sits atop everything */}
           <p
             style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: "clamp(14px, 2vw, 22px)",
-              color: palette.textMuted,
-              letterSpacing: "0.4em",
+              fontSize: "clamp(12px, 1.6vw, 20px)",
+              color: "rgba(100,70,140,0.75)",
+              letterSpacing: "0.45em",
               textTransform: "uppercase",
-              marginTop: 20,
+              marginTop: 24,
               fontWeight: 500,
+              mixBlendMode: "normal",
+              opacity: 1,
             }}
           >
             The Floradelic Experience
           </p>
         </motion.div>
 
-        <motion.div style={{ opacity, scale, width: "100%", height: "100%", position: "relative", zIndex: 10 }}>
-          <HeroCanvas />
-        </motion.div>
-
-        {/* Scroll Indicator */}
+        {/* ── Layer 5: UI / CTA Content (z:40) ── */}
         <motion.div
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           style={{
             position: "absolute",
-            bottom: 40,
-            left: "50%",
-            transform: "translateX(-50%)",
+            inset: 0,
+            zIndex: 40,
+            pointerEvents: "none",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: 8,
-            pointerEvents: "none",
-            zIndex: 20,
+            justifyContent: "flex-end",
+            paddingBottom: "clamp(32px, 6vh, 64px)",
+            x: uiX,
+            y: uiY,
           }}
         >
-          <span style={{ fontSize: 11, fontFamily: "'DM Sans', sans-serif", letterSpacing: 2, textTransform: "uppercase", color: palette.textMuted }}>
-            Scroll to Explore
-          </span>
-          <div style={{ width: 1, height: 40, background: `linear-gradient(to bottom, ${palette.textMuted}, transparent)` }} />
+          {/* CTA Row */}
+          <motion.div
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
+            style={{
+              display: "flex",
+              gap: 16,
+              alignItems: "center",
+              marginBottom: 48,
+              pointerEvents: "auto",
+            }}
+          >
+            <button
+              style={{
+                background: "rgba(130, 90, 180, 0.88)",
+                color: "#fff",
+                border: "none",
+                padding: "14px 36px",
+                borderRadius: 100,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 14,
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 8px 32px rgba(120,80,180,0.35), 0 2px 8px rgba(0,0,0,0.12)",
+                transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(110, 65, 165, 0.95)";
+                e.currentTarget.style.transform = "translateY(-2px) scale(1.03)";
+                e.currentTarget.style.boxShadow = "0 14px 40px rgba(120,80,180,0.5), 0 4px 12px rgba(0,0,0,0.15)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(130, 90, 180, 0.88)";
+                e.currentTarget.style.transform = "translateY(0) scale(1)";
+                e.currentTarget.style.boxShadow = "0 8px 32px rgba(120,80,180,0.35), 0 2px 8px rgba(0,0,0,0.12)";
+              }}
+            >
+              Shop Collection
+            </button>
+
+            <button
+              style={{
+                background: "rgba(255,255,255,0.18)",
+                color: "rgba(80,50,120,0.9)",
+                border: "1px solid rgba(180,150,220,0.45)",
+                padding: "13px 32px",
+                borderRadius: 100,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 14,
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+                backdropFilter: "blur(16px)",
+                transition: "all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.32)";
+                e.currentTarget.style.transform = "translateY(-2px)";
+                e.currentTarget.style.borderColor = "rgba(180,150,220,0.75)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "rgba(255,255,255,0.18)";
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.borderColor = "rgba(180,150,220,0.45)";
+              }}
+            >
+              Explore
+            </button>
+          </motion.div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 8,
+              pointerEvents: "none",
+            }}
+          >
+            <span style={{
+              fontSize: 10,
+              fontFamily: "'DM Sans', sans-serif",
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              color: "rgba(100,70,140,0.6)",
+              fontWeight: 600,
+            }}>
+              Scroll to Explore
+            </span>
+            <div style={{
+              width: 1,
+              height: 36,
+              background: "linear-gradient(to bottom, rgba(130,90,180,0.6), transparent)"
+            }} />
+          </motion.div>
         </motion.div>
+
+        {/* ── Vignette edge glow (decorative, z:15) ── */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 15,
+            pointerEvents: "none",
+            background: `
+              radial-gradient(ellipse 70% 50% at 50% 50%, transparent 50%, rgba(200,170,240,0.12) 100%),
+              radial-gradient(ellipse 100% 100% at 50% 110%, rgba(140,100,200,0.2) 0%, transparent 60%)
+            `,
+          }}
+        />
       </section>
 
-      {/* 2. Scroll-Revealed Image Carousel */}
+
+      {/* ═══════════════════════════════════════════════════════
+          SCROLL-REVEALED IMAGE CAROUSEL SECTION
+         ═══════════════════════════════════════════════════════ */}
       <section
         style={{
           minHeight: "100vh",
@@ -269,7 +514,7 @@ export default function Hero() {
                   height: "clamp(200px, 31.25vw, 375px)",
                   flexShrink: 0,
                   scrollSnapAlign: "center",
-                  borderRadius: 24, // GORGEOUS ROUNDED CORNERS
+                  borderRadius: 24,
                   overflow: "hidden",
                   position: "relative",
                   boxShadow: activeImg === i ? "0 20px 50px rgba(45,31,40,0.2)" : "0 4px 20px rgba(45,31,40,0.05)",
@@ -346,13 +591,9 @@ export default function Hero() {
             ))}
           </div>
 
-          {/* Custom style to hide webkit scrollbar for the carousel */}
           <style dangerouslySetInnerHTML={{
-            __html: `
-            .hide-scrollbar::-webkit-scrollbar {
-              display: none;
-            }
-          `}} />
+            __html: `.hide-scrollbar::-webkit-scrollbar { display: none; }`
+          }} />
         </motion.div>
       </section>
 

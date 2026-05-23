@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { Environment, OrbitControls, Preload } from '@react-three/drei';
+import { Environment, Preload } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import FlowerModel from './FlowerModel';
 import SceneLights from './SceneLights';
@@ -44,7 +44,6 @@ const CanvasLoader = () => (
 export default function HeroCanvas() {
   const [isMounted, setIsMounted] = useState(false);
 
-  // Avoid hydration mismatch/canvas errors on initial SSR-like renders
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -52,37 +51,38 @@ export default function HeroCanvas() {
   if (!isMounted) return <CanvasLoader />;
 
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+    // Layer z-index: 20 — bouquet canvas sits above particles backdrop
+    <div style={{ width: '100%', height: '100%', position: 'relative', zIndex: 20 }}>
       <Suspense fallback={<CanvasLoader />}>
         <Canvas
           shadows
-          dpr={[1, 2]} // Adaptive DPR for performance and sharpness
-          gl={{ antialias: true, alpha: true, toneMappingExposure: 1.2 }}
+          dpr={[1, 2]}
+          gl={{
+            antialias: true,
+            alpha: true,              // transparent canvas bg
+            toneMappingExposure: 1.3,
+          }}
           camera={{ position: [0, 0, 10], fov: 40 }}
-          style={{ position: 'absolute', inset: 0, pointerEvents: 'auto' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            // Canvas itself must be transparent so text above bleeds through
+            background: 'transparent',
+            pointerEvents: 'auto',
+          }}
         >
           {/* Lights */}
           <SceneLights />
 
-          {/* Environment HDRI for realistic reflections (using a soft preset) */}
+          {/* Environment HDRI for realistic reflections */}
           <Environment preset="city" blur={0.8} />
 
-          {/* Model & Effects */}
+          {/* 3D Bouquet model (cursor-reactive) */}
           <FlowerModel />
+
+          {/* Floating 3D particles */}
           <FloatingParticles count={60} />
 
-          {/* Controls: Trackable rotation enabled */}
-          <OrbitControls 
-            enableZoom={false}
-            enablePan={false}
-            autoRotate={true}
-            autoRotateSpeed={0.5}
-            maxPolarAngle={Math.PI / 2 + 0.3}
-            minPolarAngle={Math.PI / 2 - 0.3}
-            enableDamping={true}
-            dampingFactor={0.05}
-          />
-          
           <Preload all />
         </Canvas>
       </Suspense>

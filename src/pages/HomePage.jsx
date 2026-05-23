@@ -1,5 +1,4 @@
 import HeroSection from "../sections/home/HeroSection";
-import DeliveryFeatures from "../sections/home/DeliveryFeatures";
 import FeaturedFlowers from "../sections/home/FeaturedFlowers";
 import TrendingFlowers from "../sections/home/TrendingFlowers";
 import ComboOffers from "../sections/home/ComboOffers";
@@ -13,7 +12,6 @@ export default function HomePage() {
   return (
     <div>
       <HeroSection />
-      <DeliveryFeatures />
       <CategoriesGrid />
       <FeaturedFlowers />
       <Testimonials />
